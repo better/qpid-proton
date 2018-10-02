@@ -515,7 +515,10 @@ if (qpid-proton-proactor)
 endif()
 
 # Install executables and libraries
-install(TARGETS qpid-proton qpid-proton-core
+if (BUILD_STATIC_LIBS)
+  set(STATIC_LIBS qpid-proton-static qpid-proton-core-static)
+endif()
+install(TARGETS qpid-proton qpid-proton-core ${STATIC_LIBS}
   EXPORT  proton
   RUNTIME DESTINATION bin
   ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
@@ -532,7 +535,10 @@ if (MSVC)
 endif (MSVC)
 
 if (HAS_PROACTOR)
-  install(TARGETS qpid-proton-proactor
+  if (BUILD_STATIC_LIBS)
+    set(STATIC_LIBS qpid-proton-proactor-static)
+  endif()
+  install(TARGETS qpid-proton-proactor ${STATIC_LIBS}
     EXPORT  proton
     RUNTIME DESTINATION bin
     ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
@@ -595,4 +601,5 @@ add_subdirectory(tools)
 
 install (DIRECTORY examples/
          DESTINATION "${PROTON_SHARE}/examples/c"
+         USE_SOURCE_PERMISSIONS
          PATTERN ProtonConfig.cmake EXCLUDE)

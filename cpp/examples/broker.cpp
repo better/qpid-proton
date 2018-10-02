@@ -337,18 +337,8 @@ public:
     // A receiver receives messages from a publisher to a queue.
     void on_receiver_open(proton::receiver &receiver) OVERRIDE {
         std::string qname = receiver.target().address();
-        if (qname == "shutdown") {
-            std::cout << "broker shutting down" << std::endl;
-            // Sending to the special "shutdown" queue stops the broker.
-            receiver.connection().container().stop(
-                proton::error_condition("shutdown", "stop broker"));
-        } else {
-            if (qname.empty()) {
-                DOUT(std::cerr << "ODD - trying to attach to a empty address\n";);
-            }
-            Receiver* r = new Receiver(receiver);
-            queue_manager_.add(make_work(&QueueManager::findQueueReceiver, &queue_manager_, r, qname));
-        }
+        Receiver* r = new Receiver(receiver);
+        queue_manager_.add(make_work(&QueueManager::findQueueReceiver, &queue_manager_, r, qname));
     }
 
     void on_session_close(proton::session &session) OVERRIDE {
@@ -365,7 +355,7 @@ public:
     }
 
     void on_error(const proton::error_condition& e) OVERRIDE {
-        std::cerr << "error: " << e.what() << std::endl;
+        std::cout << "protocol error: " << e.what() << std::endl;
     }
 
     // The container calls on_transport_close() last.
@@ -439,7 +429,7 @@ int main(int argc, char **argv) {
     } catch (const example::bad_option& e) {
         std::cout << opts << std::endl << e.what() << std::endl;
     } catch (const std::exception& e) {
-        std::cerr << "broker shutdown: " << e.what() << std::endl;
+        std::cout << "broker shutdown: " << e.what() << std::endl;
     }
     return 1;
 }

@@ -81,7 +81,10 @@ set (pysrc
     proton/reactor.py
     proton/utils.py
 
+    proton/_handlers.py
+    proton/_reactor.py
     proton/_reactor_impl.py
+    proton/_utils.py
     )
 # extra files included in the source distribution
 set(py_dist_files
@@ -148,10 +151,7 @@ install(TARGETS ${SWIG_MODULE_cproton_REAL_NAME}
 install(DIRECTORY examples/
         DESTINATION "${PROTON_SHARE}/examples/python"
         COMPONENT Python
-        PATTERN "*.py"
-        PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
-                    GROUP_EXECUTE GROUP_READ
-                    WORLD_EXECUTE WORLD_READ)
+        USE_SOURCE_PERMISSIONS)
 
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "html;tutorial")
 
@@ -205,8 +205,8 @@ add_test (NAME python-test
   COMMAND ${PN_ENV_SCRIPT}
   "PATH=${py_path}" "PYTHONPATH=${py_pythonpath}"
   "SASLPASSWD=${CyrusSASL_Saslpasswd_EXECUTABLE}"
-  ${VALGRIND_ENV}
-  ${PYTHON_EXECUTABLE} -- ${python_coverage_options} "${py_tests}/proton-test")
+  ${TEST_ENV}
+  ${TEST_WRAP_PREFIX_CMD} ${PYTHON_EXECUTABLE} -- ${python_coverage_options} "${py_tests}/proton-test")
 set_tests_properties(python-test PROPERTIES PASS_REGULAR_EXPRESSION "Totals: .* 0 failed")
 
 check_python_module("tox" TOX_MODULE_FOUND)
@@ -234,8 +234,8 @@ else ()
         "PATH=${py_path}"
         "SASLPASSWD=${CyrusSASL_Saslpasswd_EXECUTABLE}"
         "SWIG=${SWIG_EXECUTABLE}"
-        ${VALGRIND_ENV} --
-        ${PYTHON_EXECUTABLE} -m tox)
+        ${TEST_ENV} --
+        ${TEST_WRAP_PREFIX_CMD} ${PYTHON_EXECUTABLE} -m tox)
       set_tests_properties(python-tox-test
         PROPERTIES
         PASS_REGULAR_EXPRESSION "Totals: .* ignored, 0 failed"
